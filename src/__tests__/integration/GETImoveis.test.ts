@@ -1,7 +1,7 @@
-import { userServices } from "../services/userServices"
-import { prisma } from "../database/prisma.client"
+import { userServices } from "../../services/userServices"
+import { prisma } from "../../database/prisma.client"
 import { hash } from "bcrypt"
-import { app, server } from "../server"
+import { app, server } from "../../server"
 import request from "supertest"
 import { sign } from "jsonwebtoken"
 
