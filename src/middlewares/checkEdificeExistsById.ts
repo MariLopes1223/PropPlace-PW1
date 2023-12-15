@@ -1,24 +1,30 @@
-import { NextFunction, Request, Response } from "express";
-import { prisma } from "../database/prisma.client";
+import { NextFunction, Request, Response } from "express"
+import { prisma } from "../database/prisma.client"
 
-const erroEdificeExists = {
-  message: 'Edificio não existe'
+const erro = {
+    message: "imóvel não existe ou não pertence ao usuario",
 }
 
-async function checkEdificeIdExists(req: Request, res: Response, next: NextFunction) {
-  const { id } = req.params;
+async function checkEdificeExistsAndBelongs(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const { id } = req.params
+    const { user_id } = req.headers
+    const exists = await prisma.imovel.findFirst({
+        where: {
+            id,
+        },
+    })
 
-  const exists = await prisma.imovel.findFirst({
-    where: {
-        id
+    if (!exists || !user_id) {
+        return res.status(400).json(erro)
     }
-  });
-
-  if (!exists) {
-    return res.status(400).json(erroEdificeExists);
-  }
-
-  next();
+    if (String(user_id) !== exists.userId) {
+        return res.status(403).json(erro)
+    }
+    next()
 }
 
-export default checkEdificeIdExists;
+export default checkEdificeExistsAndBelongs

@@ -5,7 +5,12 @@ import { Imagem } from "../model/Imagem";
 
 const handleUpload = async (req: Request, res: Response) => {
     const imagesRequest = req.files as Express.Multer.File[]
-    const imagesPath = imagesRequest.map((img) => ({ nomeImagem: img.filename })) as Imagem[]
+
+    if(!imagesRequest) {
+        return res.status(404).json({error: "Erro relacionado a imagem e upload", imagesRequest})
+    }
+
+    const imagesPath = imagesRequest.map((img) => ({ nomeImagem: img.filename })) as unknown as Imagem[]
     const { id } = req.params
     const resp = await ImagemHandle.uploadImg(id, imagesPath)
     const { status, message, imovel } = resp;

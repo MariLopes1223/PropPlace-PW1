@@ -13,6 +13,7 @@ export interface ImovelBody {
   longitude: number;
   tipo: string;
   descricao: string;
+  disponivel?: boolean,
   preco: number;
   numInquilinos: number;
 }
