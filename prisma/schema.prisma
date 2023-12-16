@@ -35,8 +35,8 @@ model Imovel {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  usuario Usuario? @relation(fields: [userId], references: [id])
-  userId  String?
+  usuario Usuario @relation(fields: [userId], references: [id])
+  userId  String
 
   imagens Imagem[]
 
@@ -50,8 +50,8 @@ model Imagem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  imovel   Imovel? @relation(fields: [imovelId], references: [id])
-  imovelId String?
+  imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  imovelId String
 
   @@map("imagens")
 }

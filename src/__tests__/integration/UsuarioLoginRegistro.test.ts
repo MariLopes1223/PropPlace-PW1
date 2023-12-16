@@ -1,7 +1,7 @@
-import { userServices } from "../services/userServices"
-import { prisma } from "../database/prisma.client"
+import { userServices } from "../../services/userServices"
+import { prisma } from "../../database/prisma.client"
 import { hash } from "bcrypt"
-import { app, server } from "../server"
+import { app, server } from "../../server"
 import request from "supertest"
 import { sign } from "jsonwebtoken"
 
@@ -97,7 +97,7 @@ describe("Testes de integração para login de usuário", () => {
             })
             expect(usuario).not.toBeNull()
         })
-        it("deve responder com status code 200 para requisição com dados válidos", async () => {
+        it("deve responder com status code 400 para requisição de registro com senha inválida", async () => {
             const { status, body } = await request(app)
                 .post("/users")
                 .set("Accept", "application/json")

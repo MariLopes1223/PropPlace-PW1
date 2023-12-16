@@ -11,5 +11,10 @@ jest.mock('./src/database/prisma.client', () => ({
 beforeEach(() => {
   mockReset(prismaMock)
 })
-
+afterEach(() => {
+  prisma.imagem.deleteMany()
+  prisma.imovel.deleteMany()
+  prisma.usuario.deleteMany()
+  jest.clearAllMocks()
+})
 export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
