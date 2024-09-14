@@ -6,7 +6,7 @@ const login = async (req: Request, res: Response): Promise<Response> => {
 
     const resp = await userServices.loginUser(username, senha)
     const { status, message, token } = resp
-    return res.status(status).json({ message, token })
+    return res.status(status).json({ message, token, username })
 }
 
 const findId = async (req: Request, res: Response): Promise<Response> => {
