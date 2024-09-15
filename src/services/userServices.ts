@@ -43,9 +43,12 @@ const create = async (
     telefone: string,
     email: string
 ) => {
-    const user = await prisma.usuario.findUnique({
+    const user = await prisma.usuario.findFirst({
         where: {
-            username,
+            OR: [
+                { username: username },
+                { email: email },
+            ],
         },
     })
     if (user) {
@@ -162,7 +165,7 @@ const findId = async (username: string) => {
     if (!user) {
         return { message: "Usuário não encontrado" }
     }
-    return user.id
+    return {id: user.id}
 }
 
 const findByUsername = async (username: string) => {
