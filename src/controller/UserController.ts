@@ -6,7 +6,7 @@ const login = async (req: Request, res: Response): Promise<Response> => {
 
     const resp = await userServices.loginUser(username, senha)
     const { status, message, token } = resp
-    return res.status(status).json({ message, token })
+    return res.status(status).json({ message, token, username })
 }
 
 const findId = async (req: Request, res: Response): Promise<Response> => {
@@ -26,7 +26,8 @@ const addUser = async (req: Request, res: Response): Promise<Response> => {
         telefone,
         email
     )
-    return res.status(201).json(resp)
+    const { message, error, status } = resp
+    return res.status(status).json({ message, error, status })
 }
 
 const listUsers = async (req: Request, res: Response): Promise<Response> => {

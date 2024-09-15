@@ -49,7 +49,7 @@ const create = async (
         },
     })
     if (user) {
-        return { message: "Usuario já existe" }
+        return { message: "Usuario já existe", status: 409}
     }
 
     const senhaCriptografada = await hash(senha, 5)
@@ -66,10 +66,10 @@ const create = async (
             },
         })
     } catch (error) {
-        return { message: "Alguma restrição do banco de dados violada", error }
+        return { message: "Alguma restrição do banco de dados violada", error, status: 400 }
     }
 
-    return { message: "Usuário cadastrado com sucesso!" }
+    return { message: "Usuário cadastrado com sucesso!", status: 201 }
 }
 
 const findAll = async (): Promise<Usuario[]> => {
