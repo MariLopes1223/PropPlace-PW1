@@ -6,7 +6,7 @@ export default {
     upload(folder: string) {
         return {
             storage: multer.diskStorage({
-                destination: resolve(__dirname, "..", "..", folder),
+                destination: resolve(__dirname, "..", "..", 'tmp', 'imovelImage'),
                 filename: (request, file, callback) => {
                     const filename = `${crypto.randomBytes(16).toString('hex')}-${file.originalname}`;
 
