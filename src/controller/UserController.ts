@@ -27,7 +27,7 @@ const addUser = async (req: Request, res: Response): Promise<Response> => {
         email
     )
     const { message, error, status } = resp
-    return res.status(status).json({ message, error, status })
+    return res.status(status).json({ message, error })
 }
 
 const listUsers = async (req: Request, res: Response): Promise<Response> => {

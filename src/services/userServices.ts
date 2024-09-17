@@ -154,6 +154,7 @@ const passwordUpdate = async (
   if (!userExists) {
     return {
       status: 401,
+      message: "usuario nao existe"
     };
   }
 
@@ -174,7 +175,7 @@ const passwordUpdate = async (
       senha: await hash(senha, 5),
         },
     })
-    return { message: "Senha atualizada com sucesso!" }
+    return { message: "Senha atualizada com sucesso!", status: 200 }
 }
 
 const findId = async (username: string) => {
