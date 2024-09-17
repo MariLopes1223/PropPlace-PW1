@@ -33,7 +33,7 @@ const loginUser = async (username: string, senha: string) => {
         expiresIn: "5h",
         subject: userExist.id,
     })
-    return { token: token, status: 200, message: "sucesso" }
+  return { token: token, status: 200, userId: userExist.id }
 }
 
 const create = async (
@@ -45,10 +45,7 @@ const create = async (
 ) => {
     const user = await prisma.usuario.findFirst({
         where: {
-            OR: [
-                { username: username },
-                { email: email },
-            ],
+      OR: [{ username: username }, { email: email }],
         },
     })
     if (user) {

@@ -5,8 +5,8 @@ const login = async (req: Request, res: Response): Promise<Response> => {
     const { username, senha } = req.body
 
     const resp = await userServices.loginUser(username, senha)
-    const { status, message, token } = resp
-    return res.status(status).json({ message, token, username })
+  const { status, message, token, userId } = resp
+  return res.status(status).json({ message, token, username, userId })
 }
 
 const findId = async (req: Request, res: Response): Promise<Response> => {
@@ -42,7 +42,7 @@ const deleteUser = async (req: Request, res: Response): Promise<Response> => {
 
     const resp = await userServices.userDelete(req.params.id)
 
-    return res.status(201).json({resp})
+  return res.status(200).json({ resp })
 }
 
 const update = async (req: Request, res: Response): Promise<Response> => {
@@ -64,11 +64,19 @@ const passwordUpdate = async (
     res: Response
 ): Promise<Response> => {
     const { id } = req.params
-    const { senha } = req.body
+  const { antigaSenha, senha } = req.body
+  try {
+    const { status, message } = await userServices.passwordUpdate(
+      id,
+      senha,
+      antigaSenha
+    )
 
-    const resp = await userServices.passwordUpdate(id, senha)
-    return res.status(200).json(resp)
-}
+    return res.status(status).json({ message })
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+};
 
 const findUser = async (req: Request, res: Response) => {
     const { username } = req.params
