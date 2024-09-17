@@ -140,14 +140,38 @@ const update = async (
     return userNew
 }
 
-const passwordUpdate = async (id: string, senha: string) => {
-    const senhaCriptografada = await hash(senha, 5)
+const passwordUpdate = async (
+  id: string,
+  senha: string,
+  antigaSenha: string
+) => {
+  const userExists = await prisma.usuario.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!userExists) {
+    return {
+      status: 401,
+    };
+  }
+
+  const verifica = await compare(antigaSenha, userExists.senha);
+
+  if (!verifica) {
+    return {
+      message: "Senha incorreta",
+      status: 401,
+    };
+  }
+
     await prisma.usuario.update({
         where: {
             id,
         },
         data: {
-            senha: senhaCriptografada,
+      senha: await hash(senha, 5),
         },
     })
     return { message: "Senha atualizada com sucesso!" }
