@@ -205,7 +205,7 @@ const findId = async (username: string) => {
 }
 
 const findByUsername = async (username: string) => {
-    const user = await prisma.usuario.findUnique({
+    const user = await prisma.usuario.findMany({
         where: {
             username,
         },
@@ -226,6 +226,12 @@ const findByUsername = async (username: string) => {
                             nomeImagem: true,
                         },
                     },
+                },
+            },
+            imagem:{
+                select:{
+                    id: true,
+                    nomeImagem: true,
                 },
             },
         },

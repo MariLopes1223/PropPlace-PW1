@@ -19,6 +19,7 @@ const handleUpload = async (req: Request, res: Response) => {
 
 const userImgUpload = async (req: Request, res: Response) => {
     const imageRequest = req.file as Express.Multer.File
+    console.log(req.file as Express.Multer.File)
     const userId = req.headers.user_id
     if(!imageRequest) {
         return res.status(404).json({error: "Erro relacionado a imagem e upload", imageRequest})
