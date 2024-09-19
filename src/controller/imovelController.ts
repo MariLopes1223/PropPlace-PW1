@@ -9,8 +9,8 @@ export class ImovelController {
                 req.body as ImovelBody,
                 req.headers.user_id as string
             )
-            const { message, status } = resp
-            return res.status(status).json({ message })
+            const { message, status, imovel } = resp
+            return res.status(status).json({ message, imovel })
         }
         return res.status(400).json({ error: "bad request" })
     }

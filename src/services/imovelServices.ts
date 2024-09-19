@@ -5,30 +5,38 @@ import { deleteFile } from "../utils/file"
 
 export class ImovelHandle {
     static async create(infos: ImovelBody, user_id: string) {
-        const imoveis = await prisma.usuario
-            .update({
-                where: { id: user_id },
-                data: {
-                    imoveis: {
-                        create: [infos],
+        try {
+            await prisma.usuario
+                .update({
+                    where: { id: user_id },
+                    data: {
+                        imoveis: {
+                            create: [infos],
+                        },
                     },
-                },
-                include: { imoveis: true },
-            })
-            .catch((error) => {
-                return { message: "database error", error }
-            })
-
+                })
+        } catch (error) {
+            return { message: "database error", error, status: 400 }
+        } 
+        const newImovel = await prisma.imovel.findFirstOrThrow({
+            where: infos,
+            include: { imagens: true }
+        })
         return {
             status: 201,
             message: "Imovel cadastrado com sucesso",
+            imovel: newImovel
         }
     }
 
     static async list() {
-        const imoveis = await prisma.imovel.findMany().catch((error) => {
+        const imoveis = await prisma.imovel.findMany({ 
+            include: { imagens: true }
+        }
+        ).catch((error) => {
             return { message: "database error", error }
         })
+        
         return imoveis
     }
 
@@ -37,6 +45,7 @@ export class ImovelHandle {
             where: {
                 nome,
             },
+            include: { imagens: true }
         })
         return imoveis
     }
@@ -46,12 +55,15 @@ export class ImovelHandle {
             where: {
                 tipo,
             },
+            include: { imagens: true }
         })
         return imoveis
     }
 
     static async findByLocale(coords: Coordinates, radius: number) {
-        const imoveis = await prisma.imovel.findMany()
+        const imoveis = await prisma.imovel.findMany({
+            include: { imagens: true }
+        })
         const filtered = imoveis.filter((imovel) =>
             isWithin(
                 { longitude: imovel.longitude, latitude: imovel.latitude },
@@ -66,12 +78,13 @@ export class ImovelHandle {
         }
     }
     //U
-    static async updateName(name: string, id: string) {
+    static async updateName(nome: string, id: string) {
         const imovel = await prisma.imovel.update({
             where: { id },
             data: {
-                nome: name,
+                nome,
             },
+            include: { imagens: true }
         })
 
         return {
@@ -90,6 +103,7 @@ export class ImovelHandle {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
             },
+            include: { imagens: true }
         })
 
         return {
@@ -104,6 +118,7 @@ export class ImovelHandle {
             data: {
                 disponivel: mod,
             },
+            include: { imagens: true }
         })
 
         return {
