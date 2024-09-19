@@ -31,7 +31,10 @@ export class ImovelHandle {
 
     static async list() {
         const imoveis = await prisma.imovel.findMany({ 
-            include: { imagens: true }
+            include: { imagens: { select: 
+                { 
+                    id: true, createdAt: true, updatedAt: true, nomeImagem: true 
+                } } }
         }
         ).catch((error) => {
             return { message: "database error", error }

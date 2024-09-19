@@ -7,7 +7,7 @@ export interface Imovel extends ImovelBody {
 export interface ImovelDTO extends Imovel {
   imagens?: Imagem[];
 }
-export interface ImovelBody {
+export interface ImovelBody extends Coordinates {
   nome: string;
   latitude: number;
   longitude: number;

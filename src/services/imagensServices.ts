@@ -14,7 +14,7 @@ export class ImagemHandle {
                         create: [...imagens]
                     }
                 },
-                include: { imagens: true }
+                include: { imagens: {select: {createdAt: true, updatedAt: true, nomeImagem: true}} }
             });
 
         } catch (error) {
@@ -63,10 +63,15 @@ export class ImagemHandle {
                 error
             }
         }
+        const { nomeImagem,
+            createdAt,
+            updatedAt } = user.imagem!
         return {
             status: 200,
             message: 'Modificado com sucesso!',
-            imagem: user.imagem
+            imagem: { nomeImagem,
+                createdAt,
+                updatedAt }
         }
     }
 

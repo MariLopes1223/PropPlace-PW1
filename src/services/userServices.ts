@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid"
 import { prisma } from "../database/prisma.client"
-import { Usuario } from "../model/Usuario"
+import { Usuario, UsuarioResp } from "../model/Usuario"
 require("dotenv").config()
 import { compare, hash } from "bcrypt"
 import { sign } from "jsonwebtoken"
@@ -72,9 +72,19 @@ const create = async (
     return { message: "Usuário cadastrado com sucesso!", status: 201 }
 }
 
-const findAll = async (): Promise<Usuario[]> => {
-    const users = await prisma.usuario.findMany({
-        include: {
+const findAll = async (): Promise<UsuarioResp[]> => {
+    const users = await prisma.usuario.findMany({ 
+        select: {
+            id: true,
+            nome: true,
+            username: true,
+            createdAt: true,
+            updatedAt: true,
+            imagem: { select: {
+                nomeImagem: true,
+                createdAt: true,
+                updatedAt: true,
+            }},
             imoveis: {
                 select: {
                     id: true,
@@ -89,13 +99,15 @@ const findAll = async (): Promise<Usuario[]> => {
                     imagens: {
                         select: {
                             nomeImagem: true,
-                        },
+                            createdAt: true,
+                            updatedAt: true,
+                        }
                     },
                 },
             },
         },
     })
-    return users
+    return users as unknown as UsuarioResp[]
 }
 
 const userDelete = async (id: string) => {
@@ -135,6 +147,7 @@ const update = async (
             telefone,
             email,
         },
+        include: { imagem: true }
     })
 
     return userNew
@@ -183,6 +196,7 @@ const findId = async (username: string) => {
         where: {
             username,
         },
+        include: { imagem: true }
     })
     if (!user) {
         return { message: "Usuário não encontrado" }
