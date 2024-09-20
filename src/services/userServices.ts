@@ -232,7 +232,7 @@ const findById = async (id: string) => {
 }
 
 const findByUsername = async (username: string) => {
-    const user = await prisma.usuario.findMany({
+    const user = await prisma.usuario.findFirst({
         where: {
             username,
         },
