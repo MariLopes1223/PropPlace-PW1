@@ -80,7 +80,27 @@ export class ImovelHandle {
             message: filtered,
         }
     }
-    //U
+    
+    static async findByUserId(userId: string) {
+        let imoveis
+        try {
+            imoveis = await prisma.imovel.findMany({
+                where: { userId },
+                include: { imagens: {
+                    select: {
+                        nomeImagem: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    }
+                }}
+            })
+            
+        } catch (error) {
+            return { error, status: 404 }
+        }
+        return { imoveis, status: 200 }
+    }
+
     static async updateName(nome: string, id: string) {
         const imovel = await prisma.imovel.update({
             where: { id },

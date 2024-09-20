@@ -21,6 +21,16 @@ export class ImovelController {
         return res.status(200).json(resp)
     }
 
+    static async findByOwner(req: Request, res: Response) {
+        const ownerId = req.query.id ? req.query.id : req.headers.user_id 
+        const { error, status, imoveis } = await ImovelHandle.findByUserId(
+          ownerId as string
+        )
+        if (error) return res.status(status).json(error);
+
+        return res.status(status).json({ imoveis });
+    }
+
     static async findByType(req: Request, res: Response) {
         const { tipo } = req.params as { tipo: string }
 

@@ -19,6 +19,11 @@ imovelRouter.get("/imoveis", ImovelController.list)
 imovelRouter.get("/imoveis/tipo/:tipo", ImovelController.findByType)
 imovelRouter.get("/imoveis/nome/:nome", ImovelController.findByName)
 imovelRouter.get("/imoveis/local/:radius", ImovelController.findByLocale)
+imovelRouter.get(
+  "/imoveis/user/owner",
+  verifyAuthorization,
+  ImovelController.findByOwner
+)
 
 imovelRouter.delete(
     "/imoveis/:id",
