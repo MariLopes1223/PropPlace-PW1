@@ -78,6 +78,8 @@ const findAll = async (): Promise<UsuarioResp[]> => {
             id: true,
             nome: true,
             username: true,
+            telefone: true,
+            email: true,
             createdAt: true,
             updatedAt: true,
             imagem: { select: {
