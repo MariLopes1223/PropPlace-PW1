@@ -9,11 +9,11 @@ const login = async (req: Request, res: Response): Promise<Response> => {
   return res.status(status).json({ message, token, username, userId })
 }
 
-const findId = async (req: Request, res: Response): Promise<Response> => {
-    const { username } = req.params
+const findById = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params
 
-    const id = await userServices.findId(username)
-    return res.status(200).json(id)
+    const user = await userServices.findById(id)
+    return res.status(200).json(user)
 }
 
 const addUser = async (req: Request, res: Response): Promise<Response> => {
@@ -93,5 +93,5 @@ export const UserController = {
     update,
     passwordUpdate,
     findUser,
-    findId,
+    findById,
 }

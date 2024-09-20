@@ -52,9 +52,9 @@ routesUsers.get(
 );
 
 routesUsers.get(
-  "/users/id/:username",
+  "/users/id/:id",
   verifyAuthorization,
-  UserController.findId
+  UserController.findById
 );
 
 export { routesUsers };
