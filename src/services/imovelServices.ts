@@ -1,6 +1,7 @@
 import { prisma } from "../database/prisma.client"
 import { ImovelBody } from "../model/Imovel"
 import { Coordinates } from "../model/Imovel"
+import { comparaImoveis } from "../utils/comparaImoveis"
 import { deleteFile } from "../utils/file"
 
 export class ImovelHandle {
@@ -19,13 +20,44 @@ export class ImovelHandle {
             return { message: "database error", error, status: 400 }
         } 
         const newImovel = await prisma.imovel.findFirstOrThrow({
-            where: infos,
-            include: { imagens: true }
-        })
+          where: infos,
+          include: {
+            imagens: {
+              select: { nomeImagem: true, createdAt: true, updatedAt: true },
+            },
+          },
+        });
         return {
             status: 201,
             message: "Imovel cadastrado com sucesso",
             imovel: newImovel
+        }
+    }
+    static async update(infos: ImovelBody, idImovel: string) {
+        try {
+          const imovelOld = await prisma.imovel.findFirst({
+            where: { id: idImovel },
+          });
+          const camposAtualizados = comparaImoveis(
+            imovelOld as ImovelBody,
+            infos
+          );
+          const imovelAtt = await prisma.imovel.update({
+            where: {
+              id: idImovel,
+            },
+            data: {
+              ...camposAtualizados,
+            },
+            include: { imagens: true },
+          });
+          return {
+            status: 201,
+            message: "Imovel atualizado com sucesso",
+            imovel: imovelAtt,
+          };
+        } catch (error) {
+          return { message: "Bad request", status: 400, error };
         }
     }
 

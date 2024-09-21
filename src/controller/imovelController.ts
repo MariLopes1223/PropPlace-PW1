@@ -15,6 +15,19 @@ export class ImovelController {
         return res.status(400).json({ error: "bad request" })
     }
 
+    static async update(req: Request, res: Response) {
+        const { id: idImovel } = req.params
+
+        const resposta = await ImovelHandle.update(
+          req.body as ImovelBody,
+          idImovel
+        );
+        const { message, status, imovel, error } = resposta;
+        if (error) return res.status(status).json({ message, error });
+
+        return res.status(status).json({ message, imovel });
+    }
+
     static async list(req: Request, res: Response) {
         const resp = await ImovelHandle.list()
 
