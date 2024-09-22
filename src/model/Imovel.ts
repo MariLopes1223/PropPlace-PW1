@@ -9,8 +9,6 @@ export interface ImovelDTO extends Imovel {
 }
 export interface ImovelBody extends Coordinates {
   nome: string;
-  latitude: number;
-  longitude: number;
   tipo: string;
   descricao: string;
   disponivel?: boolean,
