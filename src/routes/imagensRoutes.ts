@@ -11,12 +11,13 @@ const uploadImage = multer(uploadConfig.upload("./tmp/imovelImage"))
 const imagensRouter = Router()
 
 imagensRouter.post(
-    "/:imovelId/imagens",     //id do imovel ao qual a imagem pertence
+    "/:imovelId/imagens",
     verifyAuthorization,
     checkImovelBelongs,
     uploadImage.array("images"),
     imagensController.handleUpload
 )
+
 imagensRouter.put(
     "/imagem/user",
     verifyAuthorization,

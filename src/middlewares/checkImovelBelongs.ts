@@ -4,7 +4,7 @@ import { prisma } from "../database/prisma.client";
 //*middleware*//
 
 export const checkImovelBelongs = async (req: Request, res: Response, next: NextFunction) => {
-    const imovel_id = req.params.id as string
+    const imovel_id = req.params.imovelId as string
     const user_id = req.headers.user_id as string
 
     const userOwnsImovel = await prisma.imovel.findFirst({
