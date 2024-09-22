@@ -130,14 +130,6 @@ const update = async (
     telefone: string,
     email: string
 ) => {
-    const oldUser = await prisma.usuario.findUnique({
-        where: {
-            username,
-        },
-    })
-    if (oldUser) {
-        return { message: "Usuario já existe" }
-    }
 
     const userNew = await prisma.usuario.update({
         where: {

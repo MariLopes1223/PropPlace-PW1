@@ -32,7 +32,7 @@ routesUsers.put(
   "/users/:id",
   verifyAuthorization,
   checkUserIsAllowed,
-  validateUsuario.new,
+  validateUsuario.updated,
   UserController.update
 );
 
