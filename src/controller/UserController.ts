@@ -47,7 +47,12 @@ const deleteUser = async (req: Request, res: Response): Promise<Response> => {
 
 const update = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params
+    const { user_id } = req.headers
     const { nome, username, telefone, email } = req.body
+
+  if (id !== user_id){
+    return res.status(403).json({erro: "não autorizado"})
+  }
 
     const usuario = await userServices.update(
         id,
