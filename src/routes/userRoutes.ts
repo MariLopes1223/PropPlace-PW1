@@ -57,4 +57,10 @@ routesUsers.get(
   UserController.findById
 );
 
+routesUsers.post(
+  "/users/enviaEmail",
+  verifyAuthorization,
+  UserController.enviaEmail
+)
+
 export { routesUsers };

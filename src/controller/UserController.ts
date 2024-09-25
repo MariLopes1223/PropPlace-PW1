@@ -1,5 +1,6 @@
 import { userServices } from "../services/userServices"
 import { Request, Response } from "express"
+import { enviarEmail } from "../utils/envioDeEmail"
 
 const login = async (req: Request, res: Response): Promise<Response> => {
     const { username, senha } = req.body
@@ -90,6 +91,17 @@ const findUser = async (req: Request, res: Response) => {
     return res.status(200).json(user)
 }
 
+const enviaEmail = async(req: Request, res: Response) =>{
+  const { destinatario, informacoes } = req.body;
+  try{
+    await enviarEmail(destinatario, informacoes);
+    return res.status(200).json({ message: 'Email enviado com sucesso!' });
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({ error: 'Erro ao enviar email' });
+  }
+}
+
 export const UserController = {
     login,
     addUser,
@@ -99,4 +111,5 @@ export const UserController = {
     passwordUpdate,
     findUser,
     findById,
+    enviaEmail,
 }
