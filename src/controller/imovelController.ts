@@ -68,12 +68,12 @@ export class ImovelController {
             return
         }
         const resp = await ImovelHandle.findByLocale(coords, radius)
-        if (resp.message.length === 0) {
-            return res.status(200).json({
+        if (resp.imoveis.length === 0) {
+            return res.status(404).json({
                 message: `nenhum imóvel encontrado num raio de ${radius}Km`,
             })
         }
-        res.status(resp.status).json(resp.message)
+        res.status(resp.status).json(resp.imoveis)
     }
 
     static async updateName(req: Request, res: Response) {

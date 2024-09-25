@@ -96,10 +96,10 @@ export class ImovelHandle {
     }
 
     static async findByLocale(coords: Coordinates, radius: number) {
-        const imoveis = await prisma.imovel.findMany({
+        const todosImoveis = await prisma.imovel.findMany({
             include: { imagens: true }
         })
-        const filtered = imoveis.filter((imovel) =>
+        const filtered = todosImoveis.filter((imovel) =>
             isWithin(
                 { longitude: imovel.longitude, latitude: imovel.latitude },
                 coords,
@@ -109,7 +109,7 @@ export class ImovelHandle {
 
         return {
             status: 200,
-            message: filtered,
+            imoveis: filtered,
         }
     }
     
