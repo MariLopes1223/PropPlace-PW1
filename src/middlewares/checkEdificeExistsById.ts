@@ -10,11 +10,11 @@ async function checkEdificeExistsAndBelongs(
     res: Response,
     next: NextFunction
 ) {
-    const { imovelId } = req.params
+    const { id } = req.params
     const { user_id } = req.headers
     const exists = await prisma.imovel.findFirst({
         where: {
-            id: imovelId,
+            id
         },
     })
 
