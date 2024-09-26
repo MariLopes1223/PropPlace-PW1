@@ -13,7 +13,8 @@ export class ImagemHandle {
                     imagens: {
                         create: [...imagens]
                     }
-                }
+                },
+                include: { imagens: {select: {createdAt: true, updatedAt: true, nomeImagem: true}} }
             });
 
         } catch (error) {
@@ -29,6 +30,51 @@ export class ImagemHandle {
             imovel
         }
     }
+
+    static async uploadUserImg(userId: string, img: Imagem) {
+        let user = await prisma.usuario.findFirst({ where: { id: userId }, include: { imagem: true } })
+        try {
+            if (user?.imagem) {
+                user = await prisma.usuario.update({
+                    where: { id: userId },
+                    data: {
+                        imagem: {
+                            update: img
+                        }
+                    },
+                    include: { imagem: true }
+                });
+            } else {
+                user = await prisma.usuario.update({
+                    where: { id: userId },
+                    data: {
+                        imagem: {
+                            create: img
+                        }
+                    },
+                    include: { imagem: true }
+                });
+            }
+
+        } catch (error) {
+            return {
+                status: 500,
+                message: 'Erro interno do servidor!',
+                error
+            }
+        }
+        const { nomeImagem,
+            createdAt,
+            updatedAt } = user.imagem!
+        return {
+            status: 200,
+            message: 'Modificado com sucesso!',
+            imagem: { nomeImagem,
+                createdAt,
+                updatedAt }
+        }
+    }
+
     static async deleteImage(id_imovel: string, nomeImagem: string) {
         try {
             const img = await prisma.imagem.findFirst({

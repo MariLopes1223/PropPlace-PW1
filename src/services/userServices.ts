@@ -1,9 +1,11 @@
 import { v4 as uuid } from "uuid"
 import { prisma } from "../database/prisma.client"
-import { Usuario } from "../model/Usuario"
+import { Usuario, UsuarioResp } from "../model/Usuario"
 require("dotenv").config()
 import { compare, hash } from "bcrypt"
 import { sign } from "jsonwebtoken"
+import { randomUUID } from "crypto"
+import { enviarEmailRecuperaSenha, IPassRecovery } from "../utils/envioDeEmail"
 
 const loginUser = async (username: string, senha: string) => {
     const userExist = await prisma.usuario.findUnique({
@@ -33,7 +35,7 @@ const loginUser = async (username: string, senha: string) => {
         expiresIn: "5h",
         subject: userExist.id,
     })
-    return { token: token, status: 200, message: "sucesso" }
+  return { token: token, status: 200, userId: userExist.id }
 }
 
 const create = async (
@@ -43,9 +45,9 @@ const create = async (
     telefone: string,
     email: string
 ) => {
-    const user = await prisma.usuario.findUnique({
+    const user = await prisma.usuario.findFirst({
         where: {
-            username,
+      OR: [{ username: username }, { email: email }],
         },
     })
     if (user) {
@@ -72,9 +74,21 @@ const create = async (
     return { message: "Usuário cadastrado com sucesso!", status: 201 }
 }
 
-const findAll = async (): Promise<Usuario[]> => {
-    const users = await prisma.usuario.findMany({
-        include: {
+const findAll = async (): Promise<UsuarioResp[]> => {
+    const users = await prisma.usuario.findMany({ 
+        select: {
+            id: true,
+            nome: true,
+            username: true,
+            telefone: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true,
+            imagem: { select: {
+                nomeImagem: true,
+                createdAt: true,
+                updatedAt: true,
+            }},
             imoveis: {
                 select: {
                     id: true,
@@ -89,13 +103,15 @@ const findAll = async (): Promise<Usuario[]> => {
                     imagens: {
                         select: {
                             nomeImagem: true,
-                        },
+                            createdAt: true,
+                            updatedAt: true,
+                        }
                     },
                 },
             },
         },
     })
-    return users
+    return users as unknown as UsuarioResp[]
 }
 
 const userDelete = async (id: string) => {
@@ -116,14 +132,6 @@ const update = async (
     telefone: string,
     email: string
 ) => {
-    const oldUser = await prisma.usuario.findUnique({
-        where: {
-            username,
-        },
-    })
-    if (oldUser) {
-        return { message: "Usuario já existe" }
-    }
 
     const userNew = await prisma.usuario.update({
         where: {
@@ -135,38 +143,90 @@ const update = async (
             telefone,
             email,
         },
+        include: { imagem: true }
     })
 
     return userNew
 }
 
-const passwordUpdate = async (id: string, senha: string) => {
-    const senhaCriptografada = await hash(senha, 5)
+const passwordUpdate = async (
+  id: string,
+  senha: string,
+  antigaSenha: string
+) => {
+  const userExists = await prisma.usuario.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!userExists) {
+    return {
+      status: 401,
+      message: "usuario nao existe"
+    };
+  }
+
+  const verifica = await compare(antigaSenha, userExists.senha);
+
+  if (!verifica) {
+    return {
+      message: "Senha incorreta",
+      status: 401,
+    };
+  }
+
     await prisma.usuario.update({
         where: {
             id,
         },
         data: {
-            senha: senhaCriptografada,
+      senha: await hash(senha, 5),
         },
     })
-    return { message: "Senha atualizada com sucesso!" }
+    return { message: "Senha atualizada com sucesso!", status: 200 }
 }
 
-const findId = async (username: string) => {
+const findById = async (id: string) => {
     const user = await prisma.usuario.findUnique({
         where: {
-            username,
+            id,
         },
+        include: {
+            imoveis: {
+                select: {
+                    id: true,
+                    nome: true,
+                    latitude: true,
+                    longitude: true,
+                    tipo: true,
+                    descricao: true,
+                    preco: true,
+                    disponivel: true,
+                    numInquilinos: true,
+                    imagens: {
+                        select: {
+                            nomeImagem: true,
+                        },
+                    },
+                },
+            },
+            imagem:{
+                select:{
+                    nomeImagem: true,
+                },
+            },
+        },
+
     })
     if (!user) {
         return { message: "Usuário não encontrado" }
     }
-    return user.id
+    return user
 }
 
 const findByUsername = async (username: string) => {
-    const user = await prisma.usuario.findUnique({
+    const user = await prisma.usuario.findFirst({
         where: {
             username,
         },
@@ -189,6 +249,11 @@ const findByUsername = async (username: string) => {
                     },
                 },
             },
+            imagem:{
+                select:{
+                    nomeImagem: true,
+                },
+            },
         },
     })
     if (!user) {
@@ -197,13 +262,38 @@ const findByUsername = async (username: string) => {
     return user
 }
 
+const recuperaSenha = async ({nome, username, email} : IPassRecovery) => {
+  const user = await prisma.usuario.findFirstOrThrow({
+    select: { nome: true, username: true, email: true },
+    where: { email },
+  });
+
+  const senha = randomUUID() 
+  const senhaEncrypt = await hash(senha, 5)
+
+  await prisma.usuario.update({
+    where: { username },
+    data: { senha: senhaEncrypt },
+  });
+
+  const enviou = await enviarEmailRecuperaSenha({ email, nome, username, novaSenha: senha });
+
+  if (enviou) {
+    console.log("show");
+    return
+  }
+  
+   throw new Error("não enviou. paia :(");
+}
+
 export const userServices = {
     loginUser,
-    findId,
+    findById,
     create,
     findAll,
     userDelete,
     update,
     passwordUpdate,
+    recuperaSenha,
     findByUsername,
 }

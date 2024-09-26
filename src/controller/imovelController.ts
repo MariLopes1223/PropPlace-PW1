@@ -9,16 +9,39 @@ export class ImovelController {
                 req.body as ImovelBody,
                 req.headers.user_id as string
             )
-            const { message, status } = resp
-            return res.status(status).json({ message })
+            const { message, status, imovel } = resp
+            return res.status(status).json({ message, imovel })
         }
         return res.status(400).json({ error: "bad request" })
+    }
+
+    static async update(req: Request, res: Response) {
+        const { id: idImovel } = req.params
+
+        const resposta = await ImovelHandle.update(
+          req.body as ImovelBody,
+          idImovel
+        );
+        const { message, status, imovel, error } = resposta;
+        if (error) return res.status(status).json({ message, error });
+
+        return res.status(status).json({ message, imovel });
     }
 
     static async list(req: Request, res: Response) {
         const resp = await ImovelHandle.list()
 
         return res.status(200).json(resp)
+    }
+
+    static async findByOwner(req: Request, res: Response) {
+        const ownerId = req.query.id ? req.query.id : req.headers.user_id 
+        const { error, status, imoveis } = await ImovelHandle.findByUserId(
+          ownerId as string
+        )
+        if (error) return res.status(status).json(error);
+
+        return res.status(status).json({ imoveis });
     }
 
     static async findByType(req: Request, res: Response) {
@@ -45,12 +68,12 @@ export class ImovelController {
             return
         }
         const resp = await ImovelHandle.findByLocale(coords, radius)
-        if (resp.message.length === 0) {
-            return res.status(200).json({
+        if (resp.imoveis.length === 0) {
+            return res.status(404).json({
                 message: `nenhum imóvel encontrado num raio de ${radius}Km`,
             })
         }
-        res.status(resp.status).json(resp.message)
+        res.status(resp.status).json(resp.imoveis)
     }
 
     static async updateName(req: Request, res: Response) {

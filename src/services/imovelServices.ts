@@ -1,34 +1,77 @@
 import { prisma } from "../database/prisma.client"
 import { ImovelBody } from "../model/Imovel"
 import { Coordinates } from "../model/Imovel"
+import { comparaImoveis } from "../utils/comparaImoveis"
 import { deleteFile } from "../utils/file"
 
 export class ImovelHandle {
     static async create(infos: ImovelBody, user_id: string) {
-        const imoveis = await prisma.usuario
-            .update({
-                where: { id: user_id },
-                data: {
-                    imoveis: {
-                        create: [infos],
+        try {
+            await prisma.usuario
+                .update({
+                    where: { id: user_id },
+                    data: {
+                        imoveis: {
+                            create: [infos],
+                        },
                     },
-                },
-                include: { imoveis: true },
-            })
-            .catch((error) => {
-                return { message: "database error", error }
-            })
-
+                })
+        } catch (error) {
+            return { message: "database error", error, status: 400 }
+        } 
+        const newImovel = await prisma.imovel.findFirstOrThrow({
+          where: infos,
+          include: {
+            imagens: {
+              select: { nomeImagem: true, createdAt: true, updatedAt: true },
+            },
+          },
+        });
         return {
             status: 201,
             message: "Imovel cadastrado com sucesso",
+            imovel: newImovel
+        }
+    }
+    static async update(infos: ImovelBody, idImovel: string) {
+        try {
+          const imovelOld = await prisma.imovel.findFirst({
+            where: { id: idImovel },
+          });
+          const camposAtualizados = comparaImoveis(
+            imovelOld as ImovelBody,
+            infos
+          );
+          const imovelAtt = await prisma.imovel.update({
+            where: {
+              id: idImovel,
+            },
+            data: {
+              ...camposAtualizados,
+            },
+            include: { imagens: true },
+          });
+          return {
+            status: 201,
+            message: "Imovel atualizado com sucesso",
+            imovel: imovelAtt,
+          };
+        } catch (error) {
+          return { message: "Bad request", status: 400, error };
         }
     }
 
     static async list() {
-        const imoveis = await prisma.imovel.findMany().catch((error) => {
+        const imoveis = await prisma.imovel.findMany({ 
+            include: { imagens: { select: 
+                { 
+                    id: true, createdAt: true, updatedAt: true, nomeImagem: true 
+                } } }
+        }
+        ).catch((error) => {
             return { message: "database error", error }
         })
+        
         return imoveis
     }
 
@@ -37,6 +80,7 @@ export class ImovelHandle {
             where: {
                 nome,
             },
+            include: { imagens: true }
         })
         return imoveis
     }
@@ -46,13 +90,16 @@ export class ImovelHandle {
             where: {
                 tipo,
             },
+            include: { imagens: true }
         })
         return imoveis
     }
 
     static async findByLocale(coords: Coordinates, radius: number) {
-        const imoveis = await prisma.imovel.findMany()
-        const filtered = imoveis.filter((imovel) =>
+        const todosImoveis = await prisma.imovel.findMany({
+            include: { imagens: true }
+        })
+        const filtered = todosImoveis.filter((imovel) =>
             isWithin(
                 { longitude: imovel.longitude, latitude: imovel.latitude },
                 coords,
@@ -62,16 +109,37 @@ export class ImovelHandle {
 
         return {
             status: 200,
-            message: filtered,
+            imoveis: filtered,
         }
     }
-    //U
-    static async updateName(name: string, id: string) {
+    
+    static async findByUserId(userId: string) {
+        let imoveis
+        try {
+            imoveis = await prisma.imovel.findMany({
+                where: { userId },
+                include: { imagens: {
+                    select: {
+                        nomeImagem: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    }
+                }}
+            })
+            
+        } catch (error) {
+            return { error, status: 404 }
+        }
+        return { imoveis, status: 200 }
+    }
+
+    static async updateName(nome: string, id: string) {
         const imovel = await prisma.imovel.update({
             where: { id },
             data: {
-                nome: name,
+                nome,
             },
+            include: { imagens: true }
         })
 
         return {
@@ -90,6 +158,7 @@ export class ImovelHandle {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
             },
+            include: { imagens: true }
         })
 
         return {
@@ -104,6 +173,7 @@ export class ImovelHandle {
             data: {
                 disponivel: mod,
             },
+            include: { imagens: true }
         })
 
         return {

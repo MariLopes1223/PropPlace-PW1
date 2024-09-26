@@ -16,6 +16,18 @@ export default {
             }
         }
     },
+    updated: async (req: Request, res: Response, next: NextFunction) => {
+        const schema = validUserSchema.update()
+        const data = req.body
+        try {
+            await schema.validate(data, { abortEarly: false, })
+            next()
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return res.status(400).json({ error })
+            }
+        }
+    },
     password: async (req: Request, res: Response, next: NextFunction) => {
         const schema = validUserSchema.password()
         const { senha } = req.body

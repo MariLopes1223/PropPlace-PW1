@@ -16,6 +16,8 @@ model Usuario {
   email    String @unique
 
   imoveis   Imovel[]
+  imagem    Imagem?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -50,8 +52,11 @@ model Imagem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  imovel   Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
-  imovelId String
+  imovel   Imovel? @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  imovelId String?
+
+  usuario    Usuario? @relation(fields: [userId], references: [id])
+  userId  String?  @unique
 
   @@map("imagens")
 }

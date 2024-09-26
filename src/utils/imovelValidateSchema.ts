@@ -18,7 +18,7 @@ const validImovelSchema = {
                 .moreThan(0, 'Erro: preço deve ser maior que zero')
             ,
             numInquilinos: Yup.number().required('Error: numero de inquilinos deve ser obrigatório')
-                .positive('Erro: numero de inquilinos não deve ser negativo')
+                .min(0, 'Erro: numero de inquilinos não deve ser negativo')
                 .integer('Erro: numero de inquilinos deve ser um numero inteiro'),
             disponivel: Yup.boolean().default(true)
         })
