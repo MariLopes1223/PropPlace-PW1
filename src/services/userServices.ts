@@ -4,6 +4,8 @@ import { Usuario, UsuarioResp } from "../model/Usuario"
 require("dotenv").config()
 import { compare, hash } from "bcrypt"
 import { sign } from "jsonwebtoken"
+import { randomUUID } from "crypto"
+import { enviarEmailRecuperaSenha, IPassRecovery } from "../utils/envioDeEmail"
 
 const loginUser = async (username: string, senha: string) => {
     const userExist = await prisma.usuario.findUnique({
@@ -260,6 +262,30 @@ const findByUsername = async (username: string) => {
     return user
 }
 
+const recuperaSenha = async ({nome, username, email} : IPassRecovery) => {
+  const user = await prisma.usuario.findFirstOrThrow({
+    select: { nome: true, username: true, email: true },
+    where: { email },
+  });
+
+  const senha = randomUUID() 
+  const senhaEncrypt = await hash(senha, 5)
+
+  await prisma.usuario.update({
+    where: { username },
+    data: { senha: senhaEncrypt },
+  });
+
+  const enviou = await enviarEmailRecuperaSenha({ email, nome, username, novaSenha: senha });
+
+  if (enviou) {
+    console.log("show");
+    return
+  }
+  
+   throw new Error("não enviou. paia :(");
+}
+
 export const userServices = {
     loginUser,
     findById,
@@ -268,5 +294,6 @@ export const userServices = {
     userDelete,
     update,
     passwordUpdate,
+    recuperaSenha,
     findByUsername,
 }

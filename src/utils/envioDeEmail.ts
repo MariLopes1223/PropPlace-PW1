@@ -6,25 +6,65 @@ interface Objeto {
     [key: string]: string
 }
 
-const enviarEmail = async (destinatario:string, informacoes:Objeto) => {
-    const transportador = createTransport({
-        service: "gmail",
-        auth: {
-          user: env.LOGIN_EMAIL,
-          pass: env.SENHA_EMAIL
-        }
-    });
-
-    const opcoes = modeloSolicitacaoAluguel(destinatario, informacoes);
-
-    try {
-        await transportador.sendMail(opcoes);
-        return true;
-    } catch (erro) {
-        console.log(erro);
-        return false;
-    }
+export type IPassRecovery = {
+    nome: string,
+    username: string,
+    email: string,
+    novaSenha?: string
 }
+
+const transportador = createTransport({
+    service: "gmail",
+    auth: {
+      user: env.LOGIN_EMAIL,
+      pass: env.SENHA_EMAIL
+    }
+});
+
+const enviarEmail = async (destinatario: string, informacoes: Objeto) => {
+  const opcoes = modeloSolicitacaoAluguel(destinatario, informacoes);
+
+  try {
+    await transportador.sendMail(opcoes);
+    return true;
+  } catch (erro) {
+    console.log(erro);
+    return false;
+  }
+};
+
+const enviarEmailRecuperaSenha = async (infos: IPassRecovery) => {
+  const opcoes = modeloRecuperaSenha(infos);
+
+  try {
+    await transportador.sendMail(opcoes);
+    return true;
+  } catch (erro) {
+    return false;
+  }
+};
+
+const modeloRecuperaSenha = (infos: IPassRecovery) => {
+  const conteudo = `<div class="container">
+                <h2>Recuperação de Senha</h2>
+                <p>Olá, ${infos.nome}</p>
+                <p>Você solicitou a recuperação de senha :) (esperamos). Sua senha atualizada é:<br></p>
+                <p>
+                ${infos.novaSenha}
+                </p>
+                <p>Faça login o mais rápido possível e a atualize.</p>
+                <p>Atenciosamente,<br>Equipe de Suporte</p>
+            </div>`;
+  const html = construcaoCorpoEmail(conteudo);
+  const opcoes = {
+    from: env.LOGIN_EMAIL,
+    to: infos.email,
+    subject: `Recuperação de senha para ${infos.username}`,
+    html,
+  };
+
+  return opcoes;
+};
 
 const modeloSolicitacaoAluguel = (destinatario:string, informacoes:Objeto) => {
     const conteudo = `
@@ -125,4 +165,4 @@ const construcaoCorpoEmail = (conteudo:string) => {
     `;
 }
 
-export { enviarEmail };
+export { enviarEmail, enviarEmailRecuperaSenha };

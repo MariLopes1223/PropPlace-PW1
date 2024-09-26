@@ -97,8 +97,17 @@ const enviaEmail = async(req: Request, res: Response) =>{
     await enviarEmail(destinatario, informacoes);
     return res.status(200).json({ message: 'Email enviado com sucesso!' });
   } catch (erro) {
-    console.error(erro);
     return res.status(500).json({ error: 'Erro ao enviar email' });
+  }
+}
+
+const recuperaSenha = async (req: Request, res: Response) => {
+  const { nome, username, email } = req.body
+  try {
+    await userServices.recuperaSenha({ nome, username, email })
+    return res.status(200).json({ message: "Senha resetada" });
+  } catch (error) {
+    return res.status(404).json(error)
   }
 }
 
@@ -112,4 +121,5 @@ export const UserController = {
     findUser,
     findById,
     enviaEmail,
+    recuperaSenha
 }

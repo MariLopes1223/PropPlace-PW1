@@ -63,4 +63,6 @@ routesUsers.post(
   UserController.enviaEmail
 )
 
+routesUsers.post("/users/recuperaSenha", UserController.recuperaSenha)
+
 export { routesUsers };
