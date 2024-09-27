@@ -44,6 +44,16 @@ export class ImovelController {
         return res.status(status).json({ imoveis });
     }
 
+    static async findById(req: Request, res: Response) {
+        const { id } = req.params;
+        const { error, status, imovel } = await ImovelHandle.findByImovelId(
+          id as string
+        );
+        if (error) return res.status(status).json(error);
+        if (!imovel) return res.status(400).json({ message: "erro?" });
+        return res.status(status).json({ imovel });
+    }
+
     static async findByType(req: Request, res: Response) {
         const { tipo } = req.params as { tipo: string }
 
