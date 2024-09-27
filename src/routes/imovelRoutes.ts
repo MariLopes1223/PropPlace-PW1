@@ -18,6 +18,7 @@ imovelRouter.post(
 imovelRouter.get("/imoveis", ImovelController.list)
 imovelRouter.get("/imoveis/tipo/:tipo", ImovelController.findByType)
 imovelRouter.get("/imoveis/nome/:nome", ImovelController.findByName)
+imovelRouter.get("/imoveis/id/:id", ImovelController.findById)
 imovelRouter.get("/imoveis/local/:radius", ImovelController.findByLocale)
 
 imovelRouter.get(

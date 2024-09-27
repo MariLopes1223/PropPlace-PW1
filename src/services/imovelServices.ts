@@ -85,6 +85,21 @@ export class ImovelHandle {
         return imoveis
     }
 
+    static async findByImovelId(imovelId: string) {
+        try {            
+            const imovel = await prisma.imovel.findFirstOrThrow({
+                where: {
+                    id: imovelId,
+                },
+                include: { imagens: true }
+            })
+            return { imovel, status: 200 };
+            
+        } catch (error) {
+            return { error, status: 404 }
+        }
+    }
+
     static async findByType(tipo: string) {
         const imoveis = await prisma.imovel.findMany({
             where: {
