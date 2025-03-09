@@ -33,8 +33,10 @@ CREATE TABLE "imagens" (
     "nomeImagem" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
-    "imovelId" TEXT NOT NULL,
-    CONSTRAINT "imagens_imovelId_fkey" FOREIGN KEY ("imovelId") REFERENCES "imoveis" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "imovelId" TEXT,
+    "userId" TEXT,
+    CONSTRAINT "imagens_imovelId_fkey" FOREIGN KEY ("imovelId") REFERENCES "imoveis" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "imagens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "usuarios" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -48,3 +50,6 @@ CREATE UNIQUE INDEX "usuarios_email_key" ON "usuarios"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "imagens_nomeImagem_key" ON "imagens"("nomeImagem");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "imagens_userId_key" ON "imagens"("userId");
