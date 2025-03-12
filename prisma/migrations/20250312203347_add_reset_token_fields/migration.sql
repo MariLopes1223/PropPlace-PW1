@@ -1,3 +1,7 @@
+-- AlterTable
+ALTER TABLE "usuarios" ADD COLUMN "resetToken" TEXT;
+ALTER TABLE "usuarios" ADD COLUMN "resetTokenExpiry" DATETIME;
+
 -- RedefineTables
 PRAGMA defer_foreign_keys=ON;
 PRAGMA foreign_keys=OFF;

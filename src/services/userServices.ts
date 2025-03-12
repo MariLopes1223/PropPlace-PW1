@@ -262,28 +262,67 @@ const findByUsername = async (username: string) => {
     return user
 }
 
-const recuperaSenha = async ({nome, username, email} : IPassRecovery) => {
-  const user = await prisma.usuario.findFirstOrThrow({
-    select: { nome: true, username: true, email: true },
-    where: { email },
-  });
+const recuperaSenha = async (email: string) => {
+    const user = await prisma.usuario.findFirstOrThrow({
+        select: { nome: true, username: true, email: true },
+        where: { email },
+    })
 
-  const senha = randomUUID() 
-  const senhaEncrypt = await hash(senha, 5)
+    const token = randomUUID()
+    await prisma.usuario.update({
+        where: { email },
+        data: {
+            resetToken: token,
+            resetTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+    })
 
-  await prisma.usuario.update({
-    where: { username },
-    data: { senha: senhaEncrypt },
-  });
+    const enviou = await enviarEmailRecuperaSenha({
+        email,
+        nome: user.nome,
+        username: user.username,
+        token,
+    })
 
-  const enviou = await enviarEmailRecuperaSenha({ email, nome, username, novaSenha: senha });
+    if (enviou) return
 
-  if (enviou) {
-    console.log("show");
-    return
-  }
-  
-   throw new Error("não enviou. paia :(");
+    throw new Error("Erro ao enviar email")
+}
+
+const resetaSenha = async (
+    token: string,
+    senha: string,
+    senhaRepetida: string
+) => {
+    if (senha !== senhaRepetida) {
+        throw new Error("As senhas não coincidem")
+    }
+
+    const user = await prisma.usuario.findFirst({
+        where: {
+            resetToken: token,
+            resetTokenExpiry: {
+                gte: new Date(),
+            },
+        },
+    })
+
+    if (!user) {
+        throw new Error("Token inválido ou expirado")
+    }
+
+    const senhaCriptografada = await hash(senha, 5)
+
+    await prisma.usuario.update({
+        where: { id: user.id },
+        data: {
+            senha: senhaCriptografada,
+            resetToken: null,
+            resetTokenExpiry: null,
+        },
+    })
+
+    return { message: "Senha redefinida com sucesso!" }
 }
 
 export const userServices = {
@@ -295,5 +334,6 @@ export const userServices = {
     update,
     passwordUpdate,
     recuperaSenha,
+    resetaSenha,
     findByUsername,
 }

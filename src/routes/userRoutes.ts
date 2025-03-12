@@ -64,5 +64,6 @@ routesUsers.post(
 )
 
 routesUsers.post("/users/recuperaSenha", UserController.recuperaSenha)
+routesUsers.post("/users/resetSenha/:token", UserController.resetSenha)
 
 export { routesUsers };
