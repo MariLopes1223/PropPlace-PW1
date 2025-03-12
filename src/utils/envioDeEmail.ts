@@ -10,7 +10,7 @@ export type IPassRecovery = {
     nome: string,
     username: string,
     email: string,
-    novaSenha?: string
+    token?: string
 }
 
 const transportador = createTransport({
@@ -48,11 +48,10 @@ const modeloRecuperaSenha = (infos: IPassRecovery) => {
   const conteudo = `<div class="container">
                 <h2>Recuperação de Senha</h2>
                 <p>Olá, ${infos.nome}</p>
-                <p>Você solicitou a recuperação de senha :) (esperamos). Sua senha atualizada é:<br></p>
+                <p>Você solicitou a recuperação de senha :) (esperamos). Troque sua senha em:<br></p>
                 <p>
-                ${infos.novaSenha}
+                /nova-senha/${infos.token}
                 </p>
-                <p>Faça login o mais rápido possível e a atualize.</p>
                 <p>Atenciosamente,<br>Equipe de Suporte</p>
             </div>`;
   const html = construcaoCorpoEmail(conteudo);
