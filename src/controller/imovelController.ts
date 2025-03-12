@@ -71,7 +71,9 @@ export class ImovelController {
     }
 
     static async findByLocale(req: Request, res: Response) {
-        const coords = req.body as Coordinates
+        const latitude = Number(req.query.latitude) || 0
+        const longitude = Number(req.query.longitude) || 0
+        const coords = {latitude, longitude}
         const radius = Number(req.params.radius)
         if (isNaN(radius)) {
             res.status(400).send({ error: "Radius must be a number" })
